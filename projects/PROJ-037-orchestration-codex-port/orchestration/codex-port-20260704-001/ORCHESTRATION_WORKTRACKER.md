@@ -26,8 +26,17 @@
 |----|---------|--------|
 | B-01 | Awaiting user approval of ORCHESTRATION_PLAN | OPEN |
 
+## GitHub
+
+- Issue: [geekatron/jerry#315](https://github.com/geekatron/jerry/issues/315) — created, assigned to user (labels: enhancement, portability).
+
+## Execution & Validation Policy
+
+- Planner: Fable (foreground orchestrator). Executors + validators: Sonnet, **background** workers.
+- Adversarial barrier gates: max 3 iterations (H-14).
+- **QA live-run loop (Phase 3): eng-qa runs `codex` to validate changes work as intended; max 8 iterations before human review.**
+
 ## Open Items on Approval
 
-1. Create worktracker entities (EPIC/FEATURE/TASKs) from canonical templates (WTI-007).
-2. Create matching GitHub Issues (H-32, jerry repo).
-3. `export JERRY_PROJECT=PROJ-037-orchestration-codex-port`.
+1. Create worktracker entities (EPIC/FEATURE/TASKs) from canonical templates (WTI-007), linked to #315.
+2. `export JERRY_PROJECT=PROJ-037-orchestration-codex-port`.

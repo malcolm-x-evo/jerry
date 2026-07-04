@@ -19,10 +19,16 @@ capability — **multi-agent coordination** (subagent spawning, parallel pipelin
 cross-pollination, state tracking) — mapped onto Codex's own subagent mechanism, and must be
 **verified by a live end-to-end run inside Codex**, not merely structurally validated.
 
+**GitHub Issue:** [geekatron/jerry#315](https://github.com/geekatron/jerry/issues/315) (assigned to user).
+
 **Division of labor (per user):**
-- **Planning:** Fable (this session) authors this plan.
-- **Execution:** Sonnet-tier agents (`/eng-team` build, `/adversary` review) do the porting work.
+- **Planning:** Fable — this session, foreground, orchestrator role.
+- **Execution:** Sonnet-tier `/eng-team` agents spawned as **background** workers (Agent tool `run_in_background: true`).
+- **Validation:** Sonnet-tier `/adversary` gates **and** the Phase 3 QA `codex` live-run, also **background** workers.
 - **Runtime model of the ported skill:** model-agnostic (Codex picks its own model at run time).
+
+> The background-Sonnet execution/validation policy is encoded in `ORCHESTRATION.yaml` under the
+> `execution:` block and per-agent `model: sonnet` / `background: true` fields.
 
 **Current State:** Plan authored; not yet executed. Awaiting approval.
 
@@ -139,7 +145,7 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 | 0 | Discovery/Spike | Nail Codex's exact subagent + parallel mechanism and skill expression | eng-architect, ps-researcher | PENDING |
 | 1 | Port Architecture | ADR mapping orchestration semantics → Codex primitives | eng-architect | PENDING |
 | 2 | Build | Write ported skill files to `~/.codex` + repo mirror | eng-lead, eng-devsecops | PENDING |
-| 3 | Live-Run Verification | Design + execute a real Codex run of the ported skill | eng-qa | PENDING |
+| 3 | Live-Run Verification (QA) | Run `codex` to validate the changes work as intended; fix → re-run loop, **max 8 iterations before human review** | eng-qa | PENDING |
 | 4 | Synthesis | Divergence note + maintenance handoff | orch-synthesizer | PENDING |
 
 ### 3.2 Pipeline ADV Phases (quality)
@@ -232,7 +238,8 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 
 | Constraint | Value | Rationale |
 |------------|-------|-----------|
-| Max barrier retries | 3 | Circuit breaker (H-14/AE-006) |
+| Max barrier retries | 3 | Adversarial gate circuit breaker (H-14/AE-006) |
+| Max QA codex-run iterations | 8 | Phase 3 live-run validation loop; human review required after 8 failed runs (user directive) |
 | Checkpoint frequency | BARRIER | Recovery granularity |
 | Writes outside repo | Only `~/.codex/skills/orchestration/` | Least surprise; mirror kept in repo |
 
@@ -247,7 +254,7 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 | 0 | Codex subagent/parallel mechanism documented with evidence | ADV GO verdict; cites real Codex behavior/docs |
 | 1 | ADR maps every orchestration primitive (pipeline, barrier, cross-poll, state) to a Codex primitive | ADV design review >= 0.92 |
 | 2 | Ported skill files exist, load without error, follow codex convention (SKILL.md + references/ + agents/openai.yaml) | `codex` loads skill; ADV build review >= 0.92 |
-| 3 | Ported skill runs end-to-end in a real `codex` invocation on a sample workflow | Captured terminal evidence; ADV confirms genuine |
+| 3 | Ported skill runs end-to-end in a real `codex` invocation and changes work as intended | Captured terminal evidence; QA loop converges within 8 codex runs (else human review); ADV confirms genuine |
 | 4 | Divergence note + maintenance doc produced | Files exist; synthesis complete |
 
 ### 8.2 Workflow Completion Criteria

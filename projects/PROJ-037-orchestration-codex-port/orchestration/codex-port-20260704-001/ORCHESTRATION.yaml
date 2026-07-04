@@ -4,9 +4,36 @@ workflow:
   id_format: "semantic-date-seq"
   name: "Port /orchestration skill to Codex CLI"
   project_id: "PROJ-037-orchestration-codex-port"
-  status: PENDING_APPROVAL   # ACTIVE once user approves
+  github_issue: 315                 # geekatron/jerry#315 (assigned to user)
+  status: PENDING_APPROVAL          # ACTIVE once user approves
   planner_model: "fable"
   executor_model: "sonnet"
+
+# ---------------------------------------------------------------------------
+# EXECUTION POLICY (how the plan is run)
+#   - Planning: Fable (main orchestrator context, foreground).
+#   - Execution + validation: Sonnet-tier Jerry subagents, spawned as
+#     BACKGROUND workers via the Agent tool (run_in_background: true).
+#   - Single-level delegation only (P-003): orchestrator -> worker.
+# ---------------------------------------------------------------------------
+execution:
+  planner:
+    model: "fable"
+    mode: "foreground"
+    role: "orchestrator"
+  executors:
+    model: "sonnet"
+    mode: "background"              # run_in_background: true on Agent tool
+    role: "worker"
+    skills: ["eng-team"]
+  validators:
+    model: "sonnet"
+    mode: "background"              # QA + adversarial gates run as background sonnet workers
+    role: "worker"
+    skills: ["adversary", "eng-team"]   # adv-executor/adv-scorer + eng-qa/eng-reviewer
+  constraints:
+    nesting: "single-level (P-003)"
+    state_persistence: "ORCHESTRATION.yaml at every barrier (P-002)"
 
 pipelines:
   eng:
@@ -19,9 +46,15 @@ pipelines:
         status: PENDING
         agents:
           - id: eng-arch-001
+            agent_type: "jerry:eng-architect"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-0/eng-arch-001/codex-subagent-mechanism.md"
           - id: ps-rsch-001
+            agent_type: "jerry:ps-researcher"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-0/ps-rsch-001/codex-research.md"
       - id: 1
@@ -29,6 +62,9 @@ pipelines:
         status: PENDING
         agents:
           - id: eng-arch-001
+            agent_type: "jerry:eng-architect"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-1/eng-arch-001/ADR-001-codex-port.md"
       - id: 2
@@ -36,19 +72,32 @@ pipelines:
         status: PENDING
         agents:
           - id: eng-lead-001
+            agent_type: "jerry:eng-lead"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-2/eng-lead-001/build-manifest.md"
           - id: eng-dso-001
+            agent_type: "jerry:eng-devsecops"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-2/eng-dso-001/install-report.md"
       - id: 3
-        name: "Live-Run Verification"
+        name: "Live-Run Verification (QA)"
         status: PENDING
         agents:
           - id: eng-qa-001
+            agent_type: "jerry:eng-qa"
+            model: "sonnet"
+            background: true
             status: PENDING
+            role: "runs `codex` on ported skill; validates changes work as intended"
             artifact: "eng/phase-3/eng-qa-001/live-run-evidence.md"
           - id: eng-rev-001
+            agent_type: "jerry:eng-reviewer"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "eng/phase-3/eng-rev-001/final-gate.md"
       - id: 4
@@ -56,6 +105,9 @@ pipelines:
         status: PENDING
         agents:
           - id: orch-synth-001
+            agent_type: "jerry:orch-synthesizer"
+            model: "fable"
+            background: false
             status: PENDING
             artifact: "synthesis/codex-port-final.md"
   adv:
@@ -68,9 +120,15 @@ pipelines:
         status: PENDING
         agents:
           - id: adv-exec-001
+            agent_type: "jerry:adv-executor"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "adv/findings/"
           - id: adv-score-001
+            agent_type: "jerry:adv-scorer"
+            model: "sonnet"
+            background: true
             status: PENDING
             artifact: "adv/scores/"
 
@@ -128,6 +186,18 @@ quality:
   criticality: "C3"
   scoring_mechanism: "S-014"
   required_strategies: ["S-007", "S-002", "S-014", "S-004", "S-012", "S-013"]
+  # Adversarial barrier gates: standard creator-critic-revision circuit breaker.
+  barrier_gate_max_iterations: 3          # H-14 / AE-006
+  # QA live-run validation loop (Phase 3): eng-qa runs `codex` against the ported
+  # skill to validate the changes work as intended. On failure, fix -> re-run codex.
+  # Loops up to 8 times before mandatory human review (user directive).
+  qa_validation:
+    method: "live codex run (codex exec on sample workflow)"
+    validates: "ported skill changes work as intended"
+    executor: "eng-qa-001 (sonnet, background)"
+    max_iterations: 8
+    on_exhaustion: "REQUIRE_HUMAN_REVIEW"   # escalate to user after 8 failed codex runs
+    current_iteration: 0
   phase_scores: {}
   barrier_scores: {}
   workflow_quality:
@@ -148,4 +218,4 @@ metrics:
 deliverables:
   ported_skill_target: "~/.codex/skills/orchestration/"
   repo_mirror: "codex-ports/orchestration/"
-  verification: "live-run in Codex (codex exec on sample workflow)"
+  verification: "live-run in Codex (codex exec on sample workflow), max 8 QA iterations before human review"
