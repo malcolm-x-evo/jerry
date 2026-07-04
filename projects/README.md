@@ -18,6 +18,7 @@
 | PROJ-010 | cyber-ops | ACTIVE | Elite /eng-team (secure software engineering) and /red-team (offensive security) skills for authorized pentesting and system hardening |
 | PROJ-011 | saucer-boy-articles | ACTIVE | High-quality articles in the Saucer Boy (McConkey) voice covering LLM engineering topics with C4 adversarial quality gates |
 | PROJ-030 | bugs | ACTIVE | Bug fixes and defect resolution for the Jerry Framework |
+| PROJ-037 | orchestration-codex-port | ACTIVE | Port the /orchestration skill to Codex CLI, built by /eng-team and reviewed by /adversary, with live-run verification |
 
 ## Project Lookup
 
@@ -33,3 +34,4 @@
 - **PROJ-010**: `projects/PROJ-010-cyber-ops/`
 - **PROJ-011**: `projects/PROJ-011-saucer-boy-articles/`
 - **PROJ-030**: `projects/PROJ-030-bugs/`
+- **PROJ-037**: `projects/PROJ-037-orchestration-codex-port/`

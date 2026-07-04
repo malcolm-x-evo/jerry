@@ -1,0 +1,151 @@
+workflow:
+  id: "codex-port-20260704-001"
+  id_source: "auto"
+  id_format: "semantic-date-seq"
+  name: "Port /orchestration skill to Codex CLI"
+  project_id: "PROJ-037-orchestration-codex-port"
+  status: PENDING_APPROVAL   # ACTIVE once user approves
+  planner_model: "fable"
+  executor_model: "sonnet"
+
+pipelines:
+  eng:
+    short_alias: "eng"
+    skill_source: "eng-team"
+    current_phase: 0
+    phases:
+      - id: 0
+        name: "Discovery / Spike"
+        status: PENDING
+        agents:
+          - id: eng-arch-001
+            status: PENDING
+            artifact: "eng/phase-0/eng-arch-001/codex-subagent-mechanism.md"
+          - id: ps-rsch-001
+            status: PENDING
+            artifact: "eng/phase-0/ps-rsch-001/codex-research.md"
+      - id: 1
+        name: "Port Architecture (ADR)"
+        status: PENDING
+        agents:
+          - id: eng-arch-001
+            status: PENDING
+            artifact: "eng/phase-1/eng-arch-001/ADR-001-codex-port.md"
+      - id: 2
+        name: "Build the Port"
+        status: PENDING
+        agents:
+          - id: eng-lead-001
+            status: PENDING
+            artifact: "eng/phase-2/eng-lead-001/build-manifest.md"
+          - id: eng-dso-001
+            status: PENDING
+            artifact: "eng/phase-2/eng-dso-001/install-report.md"
+      - id: 3
+        name: "Live-Run Verification"
+        status: PENDING
+        agents:
+          - id: eng-qa-001
+            status: PENDING
+            artifact: "eng/phase-3/eng-qa-001/live-run-evidence.md"
+          - id: eng-rev-001
+            status: PENDING
+            artifact: "eng/phase-3/eng-rev-001/final-gate.md"
+      - id: 4
+        name: "Synthesis & Handoff"
+        status: PENDING
+        agents:
+          - id: orch-synth-001
+            status: PENDING
+            artifact: "synthesis/codex-port-final.md"
+  adv:
+    short_alias: "adv"
+    skill_source: "adversary"
+    current_phase: 0
+    phases:
+      - id: 0
+        name: "Feasibility / gate reviews"
+        status: PENDING
+        agents:
+          - id: adv-exec-001
+            status: PENDING
+            artifact: "adv/findings/"
+          - id: adv-score-001
+            status: PENDING
+            artifact: "adv/scores/"
+
+barriers:
+  - id: barrier-0
+    name: "Feasibility Gate"
+    after_phase: 0
+    status: PENDING
+    artifacts:
+      eng_to_adv: { path: "cross-pollination/barrier-0/eng-to-adv/codex-subagent-mechanism.md", status: PENDING }
+      adv_to_eng: { path: "cross-pollination/barrier-0/adv-to-eng/feasibility-verdict.md", status: PENDING }
+  - id: barrier-1
+    name: "Design Gate"
+    after_phase: 1
+    status: PENDING
+    artifacts:
+      eng_to_adv: { path: "cross-pollination/barrier-1/eng-to-adv/ADR-001-codex-port.md", status: PENDING }
+      adv_to_eng: { path: "cross-pollination/barrier-1/adv-to-eng/design-review.md", status: PENDING }
+  - id: barrier-2
+    name: "Build Gate"
+    after_phase: 2
+    status: PENDING
+    artifacts:
+      eng_to_adv: { path: "cross-pollination/barrier-2/eng-to-adv/build-manifest.md", status: PENDING }
+      adv_to_eng: { path: "cross-pollination/barrier-2/adv-to-eng/build-review.md", status: PENDING }
+  - id: barrier-3
+    name: "Verification Gate"
+    after_phase: 3
+    status: PENDING
+    artifacts:
+      eng_to_adv: { path: "cross-pollination/barrier-3/eng-to-adv/live-run-evidence.md", status: PENDING }
+      adv_to_eng: { path: "cross-pollination/barrier-3/adv-to-eng/verification-verdict.md", status: PENDING }
+
+execution_queue:
+  current_group: 0
+  groups:
+    - id: 0
+      execution_mode: SEQUENTIAL
+      agents: [eng-arch-001, ps-rsch-001, adv-exec-001, adv-score-001]
+    - id: 1
+      execution_mode: SEQUENTIAL
+      agents: [eng-arch-001, adv-exec-001, adv-score-001]
+    - id: 2
+      execution_mode: PARALLEL
+      agents: [eng-lead-001, eng-dso-001]
+    - id: 3
+      execution_mode: SEQUENTIAL
+      agents: [eng-qa-001, eng-rev-001, adv-exec-001]
+    - id: 4
+      execution_mode: SEQUENTIAL
+      agents: [orch-synth-001]
+
+quality:
+  threshold: 0.92
+  criticality: "C3"
+  scoring_mechanism: "S-014"
+  required_strategies: ["S-007", "S-002", "S-014", "S-004", "S-012", "S-013"]
+  phase_scores: {}
+  barrier_scores: {}
+  workflow_quality:
+    average_score: null
+    gates_passed: 0
+    gates_failed: 0
+
+checkpoints:
+  latest_id: null
+  entries: []
+
+metrics:
+  phases_complete: 0
+  phases_total: 5
+  agents_executed: 0
+  agents_total: 9
+
+deliverables:
+  ported_skill_target: "~/.codex/skills/orchestration/"
+  repo_mirror: "codex-ports/orchestration/"
+  verification: "live-run in Codex (codex exec on sample workflow)"
