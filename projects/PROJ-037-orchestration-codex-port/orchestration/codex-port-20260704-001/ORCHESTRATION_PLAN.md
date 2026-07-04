@@ -46,6 +46,11 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 | Criticality | **C3** (Significant: 10+ files, external tool, multi-session, live execution) | quality-enforcement SSOT |
 | Quality threshold | >= 0.92 weighted composite (H-13) | quality-enforcement SSOT |
 
+**Governing Standards & Templates (created per our standards, PROJ-037):**
+- Standard: `standards/codex-skill-port-standard.md` (frontmatter maintenance, parity CSP-01..04, divergence). Codex-specific `[VERIFY]` fields resolved in Phase 0 via `/problem-solving` official-doc analysis (MCP-001).
+- Templates: `templates/codex-ported-SKILL.template.md`, `templates/codex-ported-openai.template.yaml`.
+- Jerry frontmatter authority: H-25/H-26 (skill), H-34 (agent dual-file).
+
 **Artifact Output Locations:**
 - Pipeline ENG (build): `orchestration/codex-port-20260704-001/eng/`
 - Pipeline ADV (quality): `orchestration/codex-port-20260704-001/adv/`
@@ -142,7 +147,7 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 
 | Phase | Name | Purpose | Agents | Status |
 |-------|------|---------|--------|--------|
-| 0 | Discovery/Spike | Nail Codex's exact subagent + parallel mechanism and skill expression | eng-architect, ps-researcher | PENDING |
+| 0 | Discovery/Spike | (a) `/problem-solving` (ps-researcher) analyzes **official Codex documentation** (MCP-001: Context7/official sources, WebSearch fallback) on Codex skill + **frontmatter** standards and the subagent/parallel mechanism; (b) resolve every **[VERIFY]** item in `standards/codex-skill-port-standard.md`; (c) confirm the port structure/templates | ps-researcher, eng-architect | PENDING |
 | 1 | Port Architecture | ADR mapping orchestration semantics → Codex primitives | eng-architect | PENDING |
 | 2 | Build | Write ported skill files to `~/.codex` + repo mirror | eng-lead, eng-devsecops | PENDING |
 | 3 | Live-Run Verification (QA) | Run `codex` to validate the changes work as intended; fix → re-run loop, **max 8 iterations before human review** | eng-qa | PENDING |
@@ -245,25 +250,37 @@ pipelines cross-pollinate at every barrier: **ENG** (build) and **ADV** (quality
 
 ---
 
-## 8. Success Criteria
+## 8. Acceptance Criteria
 
-### 8.1 Phase Exit Criteria
+> These are the pass/fail gates checked **during execution** at each phase exit. A phase is not
+> COMPLETE until every acceptance criterion (AC) is met and its adversarial gate scores >= 0.92.
+> Standards referenced: `standards/codex-skill-port-standard.md` (CSP-01..04), Jerry H-25/H-26/H-34.
 
-| Phase | Criterion | Validation |
-|-------|-----------|------------|
-| 0 | Codex subagent/parallel mechanism documented with evidence | ADV GO verdict; cites real Codex behavior/docs |
-| 1 | ADR maps every orchestration primitive (pipeline, barrier, cross-poll, state) to a Codex primitive | ADV design review >= 0.92 |
-| 2 | Ported skill files exist, load without error, follow codex convention (SKILL.md + references/ + agents/openai.yaml) | `codex` loads skill; ADV build review >= 0.92 |
-| 3 | Ported skill runs end-to-end in a real `codex` invocation and changes work as intended | Captured terminal evidence; QA loop converges within 8 codex runs (else human review); ADV confirms genuine |
-| 4 | Divergence note + maintenance doc produced | Files exist; synthesis complete |
+### 8.1 Per-Phase Acceptance Criteria
+
+| Phase | AC ID | Acceptance Criterion (must be TRUE to exit) | How verified |
+|-------|-------|---------------------------------------------|--------------|
+| 0 | AC-0.1 | `/problem-solving` produced a Codex-official-docs research artifact on skill + **frontmatter** standards and subagent/parallel mechanism, sourced via Context7/official docs (MCP-001) | Artifact cites official sources; ADV feasibility gate GO |
+| 0 | AC-0.2 | Every **[VERIFY]** item in `codex-skill-port-standard.md` resolved (confirmed or corrected) | Standard updated; no open [VERIFY] |
+| 0 | AC-0.3 | GO/NO-GO decision recorded with evidence | `feasibility-verdict.md`; NO-GO → escalate |
+| 1 | AC-1.1 | ADR maps every orchestration primitive (pipeline, barrier, cross-pollination, state) to a Codex primitive | ADV design review >= 0.92 |
+| 1 | AC-1.2 | Port standard + templates finalized against Phase 0 research (`codex-ported-SKILL.template.md`, `codex-ported-openai.template.yaml`) | Templates validated; ADV review |
+| 2 | AC-2.1 | Ported skill files exist and follow Codex convention (SKILL.md + `references/` + `agents/openai.yaml`) written to `~/.codex/skills/orchestration/` **and** repo mirror `codex-ports/orchestration/` | File check + CSP-03 parity |
+| 2 | AC-2.2 | Frontmatter valid: `name`+`description` present, no XML `< >` (H-26/CSP-02); `openai.yaml` quoting rules + `$skill` default_prompt (CSP-04) | Lint/inspection; ADV build review >= 0.92 |
+| 2 | AC-2.3 | Divergence header present (`codex-x.y.z` + forked-from + divergence note) | Header inspection |
+| 3 | AC-3.1 | Ported skill loads in `codex` without error and triggers on its description | `codex` load evidence |
+| 3 | AC-3.2 | Real `codex` run validates the changes work as intended on a sample workflow; QA loop converges **within 8 iterations** (else mandatory human review) | Captured transcript; `qa_validation.current_iteration <= 8`; ADV confirms genuine (P-022) |
+| 4 | AC-4.1 | Divergence note + maintenance doc (CSP parity rules) produced; final synthesis complete | Files exist; synthesis reviewed |
 
 ### 8.2 Workflow Completion Criteria
 
 | Criterion | Validation |
 |-----------|------------|
-| All phases COMPLETE | ORCHESTRATION.yaml all phase status = COMPLETE |
+| All phases COMPLETE | ORCHESTRATION.yaml all phase status = COMPLETE; all AC met |
 | All barriers PASS | All 4 barrier scores >= 0.92 |
-| **Live run verified** | Real Codex run transcript captured in `live-run-evidence.md` |
+| **Live run verified** | Real Codex run transcript in `live-run-evidence.md`; QA converged <= 8 iters |
+| Standard + templates finalized | `standards/codex-skill-port-standard.md` has zero open [VERIFY]; templates validated |
+| Mirror parity | `codex-ports/orchestration/` == `~/.codex/skills/orchestration/` (CSP-03) |
 | Final synthesis created | `synthesis/codex-port-final.md` exists |
 
 ---

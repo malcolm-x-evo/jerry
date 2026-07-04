@@ -1,0 +1,25 @@
+# agents/openai.yaml — Codex UI/harness metadata (NOT read by the agent).
+# Rules: quote all string values; keep keys unquoted. short_description 25-64 chars.
+# default_prompt: 1 sentence, MUST mention the skill as $<skill-name>.
+# Codex port version: codex-1.0.0 (independent of Jerry source; see SKILL.md header)
+
+interface:
+  display_name: "{Human Title}"
+  short_description: "{25-64 char UI blurb}"
+  default_prompt: "Use $skill-name to {short example task}."
+  # Optional — include only if provided:
+  # icon_small: "./assets/small-400px.png"
+  # icon_large: "./assets/large-logo.svg"
+  # brand_color: "#3B82F6"
+
+# Optional — declare only real MCP dependencies (type: mcp is the only supported type):
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "{server-name}"
+#       description: "{human-readable}"
+#       transport: "streamable_http"
+#       url: "{mcp-url}"
+
+policy:
+  allow_implicit_invocation: true   # false = explicit $skill invocation only

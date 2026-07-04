@@ -219,3 +219,17 @@ deliverables:
   ported_skill_target: "~/.codex/skills/orchestration/"
   repo_mirror: "codex-ports/orchestration/"
   verification: "live-run in Codex (codex exec on sample workflow), max 8 QA iterations before human review"
+  standard: "projects/PROJ-037-orchestration-codex-port/standards/codex-skill-port-standard.md"
+  templates:
+    - "projects/PROJ-037-orchestration-codex-port/templates/codex-ported-SKILL.template.md"
+    - "projects/PROJ-037-orchestration-codex-port/templates/codex-ported-openai.template.yaml"
+
+# Phase 0 official-documentation analysis of Codex standards (user directive)
+official_doc_analysis:
+  skill: "/problem-solving"
+  agent: "ps-researcher (sonnet, background)"
+  scope: "Codex skill + frontmatter standards; subagent/parallel mechanism"
+  sources: "Context7 / official Codex docs (MCP-001); WebSearch fallback"
+  resolves: "all [VERIFY] items in codex-skill-port-standard.md"
+  artifact: "eng/phase-0/ps-rsch-001/codex-official-standards.md"
+  acceptance: "AC-0.1, AC-0.2 (see ORCHESTRATION_PLAN.md §8.1)"
