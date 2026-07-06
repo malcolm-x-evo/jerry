@@ -1,0 +1,16 @@
+# agents/openai.yaml — Codex UI/harness metadata (NOT read by the agent).
+# Codex port version: codex-1.0.0 (independent of Jerry /orchestration v2.2.0; see SKILL.md header)
+#
+# B-R5 / CSP-04 exception: The CSP standard requires default_prompt to mention $<skill-name>.
+# The production adversary and eng-team Codex ports omit the $-prefix literal and use descriptive
+# prose instead. This port follows the established production-port convention (descriptive prose).
+# If Codex skill-creator validation requires the $orchestration literal in a future version,
+# add "$orchestration" to the default_prompt sentence at that time.
+
+interface:
+  display_name: "Orchestration — Multi-Agent Workflow Coordinator"
+  short_description: "Multi-agent workflow orchestration with checkpointing."
+  default_prompt: "Plan and coordinate a structured multi-agent workflow with sequential phase tracking, sync barriers, quality gates (>= 0.92), cross-pollination handoffs, and checkpoint resumption using the orchestration skill."
+
+policy:
+  allow_implicit_invocation: true

@@ -45,7 +45,9 @@ independent version tracking, and ongoing maintenance. Does NOT change the Jerry
 |-------|----------|------------|--------|
 | `name` | Yes | Matches Codex skill folder | Confirmed (skill-creator) |
 | `description` | Yes | Only `name`+`description` are read by Codex to trigger the skill; make it comprehensive (WHAT + WHEN). No `< >` (safe-frontmatter parity with H-26). | Confirmed (skill-creator) |
-| Jerry-only fields (`version`, `allowed-tools`, `activation-keywords`) | No | **Dropped** in the Codex SKILL.md — Codex ignores them. Port version tracked in the body header instead (see Divergence). | **[VERIFY]** no other fields are read |
+| Codex validator allowlist | — | Codex `quick_validate.py` allows ONLY `{name, description, license, allowed-tools, metadata}`. | Confirmed (ps-researcher, Phase 0) |
+| Jerry-only fields (`version`, `activation-keywords`) | No | **MUST be dropped** — they are NOT in the allowlist and cause a **validator ERROR** (not silent ignore). Port version tracked in the body header instead (see Divergence). | RESOLVED (was [VERIFY]) |
+| `allowed-tools` | No | Permitted by the validator, but Codex semantics differ (space-separated tool string, e.g. `Bash(git:*) Read`). **MUST NOT** copy Jerry's `allowed-tools` value. Existing ports omit it; recommend omitting. | RESOLVED (was [VERIFY]) |
 
 ### Codex `agents/openai.yaml` (UI/harness metadata — NOT read by the agent)
 
